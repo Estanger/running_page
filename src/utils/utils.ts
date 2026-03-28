@@ -342,7 +342,8 @@ const activityTypeName = (run: Activity): string => {
   const t = run.type.toLowerCase();
   if (t === 'run') {
     const runDistance = run.distance / 1000;
-    if (runDistance > 20 && runDistance < 40) return RUN_TITLES.HALF_MARATHON_RUN_TITLE;
+    if (runDistance > 20 && runDistance < 40)
+      return RUN_TITLES.HALF_MARATHON_RUN_TITLE;
     if (runDistance >= 40) return RUN_TITLES.FULL_MARATHON_RUN_TITLE;
     return ACTIVITY_TYPES.RUN_GENERIC_TITLE;
   }
