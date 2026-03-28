@@ -97,7 +97,7 @@ const YearStat = ({
 
   const typeStats = computeTypeStats(runs);
 
-  const activitiesLabel = IS_CHINESE ? ' 次活动' : ' Activities';
+  const activitiesLabel = ' Activities';
   const distLabel = ` ${DIST_UNIT}`;
 
   return (
@@ -118,9 +118,7 @@ const YearStat = ({
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm opacity-80">
             {typeStats.map((ts) => (
               <span key={ts.label}>
-                {ts.label} {ts.count}
-                {IS_CHINESE ? '次' : ''} /{' '}
-                {(ts.distance / M_TO_DIST).toFixed(1)}
+                {ts.label} {ts.count} / {(ts.distance / M_TO_DIST).toFixed(1)}
                 {DIST_UNIT}
               </span>
             ))}

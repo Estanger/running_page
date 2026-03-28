@@ -359,7 +359,7 @@ const titleForRun = (run: Activity): string => {
   if (RICH_TITLE && run.name != '') {
     return run.name;
   }
-  return `${timeOfDay(run)}${activityTypeName(run)}`;
+  return activityTypeName(run);
 };
 
 export interface IViewState {
@@ -372,23 +372,28 @@ const getBoundsForGeoData = (
   geoData: FeatureCollection<LineString>
 ): IViewState => {
   const { features } = geoData;
-  let points: Coordinate[] = [];
-  // find first have data
+  let allPoints: Coordinate[] = [];
+
   for (const f of features) {
     if (f.geometry.coordinates.length) {
-      points = f.geometry.coordinates as Coordinate[];
-      break;
+      allPoints = allPoints.concat(f.geometry.coordinates as Coordinate[]);
     }
   }
-  if (points.length === 0) {
+
+  if (allPoints.length === 0) {
     return { longitude: 20, latitude: 20, zoom: 3 };
   }
-  if (points.length === 2 && String(points[0]) === String(points[1])) {
-    return { longitude: points[0][0], latitude: points[0][1], zoom: 9 };
+  if (allPoints.length === 2 && String(allPoints[0]) === String(allPoints[1])) {
+    return { longitude: allPoints[0][0], latitude: allPoints[0][1], zoom: 9 };
   }
-  // Calculate corner values of bounds
-  const pointsLong = points.map((point) => point[0]) as number[];
-  const pointsLat = points.map((point) => point[1]) as number[];
+
+  // Exclude outlier points (e.g. Hainan lat<20.5) when multiple features for better framing
+  const boundsPoints =
+    features.length > 2 ? allPoints.filter((p) => p[1] > 20.5) : allPoints;
+  const finalPoints = boundsPoints.length > 0 ? boundsPoints : allPoints;
+
+  const pointsLong = finalPoints.map((point) => point[0]) as number[];
+  const pointsLat = finalPoints.map((point) => point[1]) as number[];
   const cornersLongLat: [Coordinate, Coordinate] = [
     [Math.min(...pointsLong), Math.min(...pointsLat)],
     [Math.max(...pointsLong), Math.max(...pointsLat)],
@@ -396,11 +401,8 @@ const getBoundsForGeoData = (
   const viewState = new WebMercatorViewport({
     width: 800,
     height: 600,
-  }).fitBounds(cornersLongLat, { padding: 200 });
-  let { longitude, latitude, zoom } = viewState;
-  if (features.length > 1) {
-    zoom = 11.5;
-  }
+  }).fitBounds(cornersLongLat, { padding: 30 });
+  const { longitude, latitude, zoom } = viewState;
   return { longitude, latitude, zoom };
 };
 

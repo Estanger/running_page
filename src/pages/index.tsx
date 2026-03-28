@@ -174,20 +174,11 @@ const Index = () => {
 
   const changeYear = useCallback(
     (y: string) => {
-      // default year
       setYear(y);
-
-      if ((viewState.zoom ?? 0) > 3 && bounds) {
-        setViewState({
-          ...bounds,
-        });
-      }
-
       changeByItem(y, 'Year', filterYearRuns);
-      // Stop current animation
       setIsAnimating(false);
     },
-    [viewState.zoom, bounds, changeByItem]
+    [changeByItem]
   );
 
   const changeCity = useCallback(
@@ -312,11 +303,10 @@ const Index = () => {
 
   // Update bounds when geoData changes
   useEffect(() => {
-    if (singleRunId === null) {
-      setViewState((prev) => ({
-        ...prev,
+    if (singleRunId === null && bounds) {
+      setViewState({
         ...bounds,
-      }));
+      });
     }
   }, [bounds, singleRunId]);
 

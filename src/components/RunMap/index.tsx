@@ -45,6 +45,7 @@ import { FeatureCollection } from 'geojson';
 import { RPGeometry } from '@/static/run_countries';
 import './mapbox.css';
 import LightsControl from '@/components/RunMap/LightsControl';
+import MapLegend from '@/components/RunMap/MapLegend';
 import { useMapTheme, useThemeChangeCounter } from '@/hooks/useTheme';
 
 interface IRunMapProps {
@@ -524,6 +525,7 @@ const RunMap = ({
       <span className={styles.runTitle}>{title}</span>
       <FullscreenControl style={fullscreenButton} />
       {!PRIVACY_MODE && <LightsControl setLights={setLights} lights={lights} />}
+      {!isSingleRun && <MapLegend />}
       <NavigationControl
         showCompass={false}
         position={'bottom-right'}
