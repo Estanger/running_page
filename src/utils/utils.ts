@@ -301,7 +301,8 @@ const geoJsonForMap = async (): Promise<FeatureCollection<RPGeometry>> => {
 };
 
 const getActivitySport = (act: Activity): string => {
-  if (act.type === 'Run') {
+  const t = act.type.toLowerCase();
+  if (t === 'run') {
     if (act.subtype === 'generic') {
       const runDistance = act.distance / 1000;
       if (runDistance > 20 && runDistance < 40) {
@@ -314,55 +315,50 @@ const getActivitySport = (act: Activity): string => {
     else if (act.subtype === 'treadmill')
       return ACTIVITY_TYPES.RUN_TREADMILL_TITLE;
     else return ACTIVITY_TYPES.RUN_GENERIC_TITLE;
-  } else if (act.type === 'hiking') {
+  } else if (t === 'hike' || t === 'hiking') {
     return ACTIVITY_TYPES.HIKING_TITLE;
-  } else if (act.type === 'cycling') {
+  } else if (t === 'ride' || t === 'cycling') {
     return ACTIVITY_TYPES.CYCLING_TITLE;
-  } else if (act.type === 'walking') {
+  } else if (t === 'walk' || t === 'walking') {
     return ACTIVITY_TYPES.WALKING_TITLE;
-  }
-  // if act.type contains 'skiing'
-  else if (act.type.includes('skiing')) {
+  } else if (t === 'swim' || t === 'swimming') {
+    return ACTIVITY_TYPES.SWIMMING_TITLE;
+  } else if (t.includes('ski')) {
     return ACTIVITY_TYPES.SKIING_TITLE;
   }
   return '';
 };
 
-const titleForRun = (run: Activity): string => {
-  if (RICH_TITLE) {
-    // 1. try to use user defined name
-    if (run.name != '') {
-      return run.name;
-    }
-    // 2. try to use location+type if the location is available, eg. 'Shanghai Run'
-    const { city } = locationForRun(run);
-    const activity_sport = getActivitySport(run);
-    if (city && city.length > 0 && activity_sport.length > 0) {
-      return `${city} ${activity_sport}`;
-    }
-  }
-  // 3. use time+length if location or type is not available
-  const runDistance = run.distance / 1000;
+const timeOfDay = (run: Activity): string => {
   const runHour = +run.start_date_local.slice(11, 13);
-  if (runDistance > 20 && runDistance < 40) {
-    return RUN_TITLES.HALF_MARATHON_RUN_TITLE;
+  if (runHour >= 0 && runHour <= 10) return '清晨';
+  if (runHour > 10 && runHour <= 14) return '午间';
+  if (runHour > 14 && runHour <= 18) return '午后';
+  if (runHour > 18 && runHour <= 21) return '傍晚';
+  return '夜晚';
+};
+
+const activityTypeName = (run: Activity): string => {
+  const t = run.type.toLowerCase();
+  if (t === 'run') {
+    const runDistance = run.distance / 1000;
+    if (runDistance > 20 && runDistance < 40) return RUN_TITLES.HALF_MARATHON_RUN_TITLE;
+    if (runDistance >= 40) return RUN_TITLES.FULL_MARATHON_RUN_TITLE;
+    return ACTIVITY_TYPES.RUN_GENERIC_TITLE;
   }
-  if (runDistance >= 40) {
-    return RUN_TITLES.FULL_MARATHON_RUN_TITLE;
+  if (t === 'ride' || t === 'cycling') return ACTIVITY_TYPES.CYCLING_TITLE;
+  if (t === 'hike' || t === 'hiking') return ACTIVITY_TYPES.HIKING_TITLE;
+  if (t === 'walk' || t === 'walking') return ACTIVITY_TYPES.WALKING_TITLE;
+  if (t === 'swim' || t === 'swimming') return ACTIVITY_TYPES.SWIMMING_TITLE;
+  if (t.includes('ski')) return ACTIVITY_TYPES.SKIING_TITLE;
+  return ACTIVITY_TYPES.RUN_GENERIC_TITLE;
+};
+
+const titleForRun = (run: Activity): string => {
+  if (RICH_TITLE && run.name != '') {
+    return run.name;
   }
-  if (runHour >= 0 && runHour <= 10) {
-    return RUN_TITLES.MORNING_RUN_TITLE;
-  }
-  if (runHour > 10 && runHour <= 14) {
-    return RUN_TITLES.MIDDAY_RUN_TITLE;
-  }
-  if (runHour > 14 && runHour <= 18) {
-    return RUN_TITLES.AFTERNOON_RUN_TITLE;
-  }
-  if (runHour > 18 && runHour <= 21) {
-    return RUN_TITLES.EVENING_RUN_TITLE;
-  }
-  return RUN_TITLES.NIGHT_RUN_TITLE;
+  return `${timeOfDay(run)}${activityTypeName(run)}`;
 };
 
 export interface IViewState {
