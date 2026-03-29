@@ -392,7 +392,10 @@ const getBoundsForGeoData = (
     features.length > 2 ? allPoints.filter((p) => p[1] > 20.5) : allPoints;
   const finalPoints = boundsPoints.length > 0 ? boundsPoints : allPoints;
 
-  let minLong = Infinity, maxLong = -Infinity, minLat = Infinity, maxLat = -Infinity;
+  let minLong = Infinity,
+    maxLong = -Infinity,
+    minLat = Infinity,
+    maxLat = -Infinity;
   for (const point of finalPoints) {
     if (point[0] < minLong) minLong = point[0];
     if (point[0] > maxLong) maxLong = point[0];
