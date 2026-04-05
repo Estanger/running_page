@@ -47,6 +47,7 @@ import './mapbox.css';
 import LightsControl from '@/components/RunMap/LightsControl';
 import MapLegend from '@/components/RunMap/MapLegend';
 import { useMapTheme, useThemeChangeCounter } from '@/hooks/useTheme';
+import { createShenzhenMask, createShenzhenBorder } from '@/utils/bindaryMask';
 
 interface IRunMapProps {
   title: string;
@@ -329,6 +330,9 @@ const RunMap = ({
     return USE_DASH_LINE && !isSingleRun && !isBigMap ? [2, 2] : [2, 0];
   }, [isSingleRun, isBigMap]);
 
+  const shenzhenMask = useMemo(() => createShenzhenMask(), []);
+  const shenzhenBorder = useMemo(() => createShenzhenBorder(), []);
+
   const onMove = useCallback(
     ({ viewState }: { viewState: IViewState }) => {
       setViewState(viewState);
@@ -514,6 +518,38 @@ const RunMap = ({
           />
         </Source>
       )}
+      <Source id="shenzhen-mask" type="geojson" data={shenzhenMask}>
+        <Layer
+          id="shenzhen-mask-fill"
+          type="fill"
+          paint={{
+            'fill-color': '#e0e0e0',
+            'fill-opacity': 0.08,
+          }}
+        />
+      </Source>
+      <Source
+        id="shenzhen-border"
+        type="geojson"
+        data={shenzhenBorder}
+        tolerance={0}
+      >
+        <Layer
+          id="shenzhen-border-line"
+          type="line"
+          paint={{
+            'line-color': '#9e9e9e',
+            'line-width': 1,
+            'line-dasharray': [2, 0],
+            'line-opacity': 0.7,
+          }}
+          layout={{
+            'line-join': 'miter',
+            'line-cap': 'butt',
+            'line-miter-limit': 3,
+          }}
+        />
+      </Source>
       {isSingleRun && (
         <RunMarker
           startLat={startLat}
